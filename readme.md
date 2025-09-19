@@ -27,6 +27,8 @@ https://discord.com/developers/applications
 	- Client information
 		- Client Secret
 			- need to put this in DISCORD_TOKEN in .env
+		- Client ID
+			- need to put this in CLIENT_ID in .env
 
 - Bot
 	- Authorization Flow
