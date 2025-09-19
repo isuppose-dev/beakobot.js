@@ -19,5 +19,5 @@ const rest = new REST().setToken(env.DISCORD_TOKEN);
 		);
 
 	}
-	catch (error) { console.error(error);}
+	catch (error) { console.error(error); }
 })();
