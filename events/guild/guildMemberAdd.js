@@ -32,7 +32,8 @@ module.exports = {
 
 			const embed = new EmbedBuilder()
 				.setColor(Number(process.env.COLOR))
-				.setTitle(welcomeMessage)
+				.setTitle(`${member.user.username} has joined`)
+				.setDescription(welcomeMessage)
 				.setThumbnail(member.displayAvatarURL({ format: 'png', size: 128, dynamic: true }));
 			channel.send({ embeds:[embed] }).catch(error => { console.error(`GuildMemberAdd: ${error.message}`); });
 		}
