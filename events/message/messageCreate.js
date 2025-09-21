@@ -76,22 +76,36 @@ module.exports = {
 					await new Promise(resolve => setTimeout(resolve, 1500));
 					const fetchedMessage = await message.channel.messages.fetch(message.id);
 					if (fetchedMessage.embeds.length < 1) {
-						message.reply({ files: [photos[0].url] }).catch(error => { console.error(`MessageCreate: ${error.message}`); });
+						try {
+							const sent = await message.reply({ content: `[@${data.tweet.author.name}](${data.tweet.author.url})\n${data.tweet.text}`, files: [photos[0].url] });
+							const fetched = await message.channel.messages.fetch(sent.id);
+							await message.suppressEmbeds(true);
+							await fetched.suppressEmbeds(true);
+						}
+						catch (error) { console.error(`MessageCreate: ${error.message}`); }
 					}
 				}
 				// Multiple photos
 				else if (photos.length > 1) {
 					const photoUrls = photos.map(photo => photo.url);
-					message.reply({ files: photoUrls }).catch(error => { console.error(`MessageCreate: ${error.message}`); });
-					message.suppressEmbeds(true).catch(error => { console.error(`MessageCreate: ${error.message}`); });
+					try {
+						const sent = await message.reply({ content: `[@${data.tweet.author.name}](${data.tweet.author.url})\n${data.tweet.text}`, files: photoUrls });
+						const fetched = await message.channel.messages.fetch(sent.id);
+						await message.suppressEmbeds(true);
+						await fetched.suppressEmbeds(true);
+					}
+					catch (error) { console.error(`MessageCreate: ${error.message}`); }
+
 				}
 				// Embed video
 				else if (videos.length > 0) {
-					if (videos[0].type === 'gif') {
-						message.reply({ content:'pretend this is a gif 🥀', files: [videos[0].url] }).catch(error => { console.error(`MessageCreate: ${error.message}`); });
+					try {
+						const sent = await message.reply({ content: `[@${data.tweet.author.name}](${data.tweet.author.url})\n${data.tweet.text}`, files: [videos[0].url] });
+						const fetched = await message.channel.messages.fetch(sent.id);
+						await message.suppressEmbeds(true);
+						await fetched.suppressEmbeds(true);
 					}
-					else {message.reply({ files: [videos[0].url] }).catch(error => { console.error(`MessageCreate: ${error.message}`); });}
-					message.suppressEmbeds(true).catch(error => { console.error(`MessageCreate: ${error.message}`); });
+					catch (error) { console.error(`MessageCreate: ${error.message}`); }
 				}
 				else if (data.tweet.text.length > 280) {
 					message.reply(`${FxEmbedUrl}/i/status/${tweetId}`).catch(error => { console.error(`MessageCreate: ${error.message}`); });
