@@ -22,7 +22,7 @@ module.exports = {
 		if (funToggle) {
 			if (Math.random() < 0.01) {
 				if (message.author.tag != process.env.ISUPPOSE) {
-					message.react('🤓').catch(error => { console.error(`MessageCreate: ${error.message}`); });
+					await message.react('🤓').catch(error => { console.error(`MessageCreate: ${error.message}`); });
 				}
 			}
 
@@ -73,14 +73,17 @@ module.exports = {
 
 				// 1 Photo exists, isnt embedding (1 photo and it embeds who cares)
 				if (photos.length === 1) {
-					if (message.embeds.length != 1) {
+					await new Promise(resolve => setTimeout(resolve, 1500));
+					const fetchedMessage = await message.channel.messages.fetch(message.id);
+					if (fetchedMessage.embeds.length < 1) {
 						message.reply({ files: [photos[0].url] }).catch(error => { console.error(`MessageCreate: ${error.message}`); });
 					}
 				}
 				// Multiple photos
 				else if (photos.length > 1) {
-					const photoUrls = photos.map(photo => photo.url).catch(error => { console.error(`MessageCreate: ${error.message}`); });
-					message.reply({ files: photoUrls });
+					const photoUrls = photos.map(photo => photo.url);
+					message.reply({ files: photoUrls }).catch(error => { console.error(`MessageCreate: ${error.message}`); });
+					message.suppressEmbeds(true).catch(error => { console.error(`MessageCreate: ${error.message}`); });
 				}
 				// Embed video
 				else if (videos.length > 0) {
@@ -88,9 +91,11 @@ module.exports = {
 						message.reply({ content:'pretend this is a gif 🥀', files: [videos[0].url] }).catch(error => { console.error(`MessageCreate: ${error.message}`); });
 					}
 					else {message.reply({ files: [videos[0].url] }).catch(error => { console.error(`MessageCreate: ${error.message}`); });}
+					message.suppressEmbeds(true).catch(error => { console.error(`MessageCreate: ${error.message}`); });
 				}
 				else if (data.tweet.text.length > 280) {
 					message.reply(`${FxEmbedUrl}/i/status/${tweetId}`).catch(error => { console.error(`MessageCreate: ${error.message}`); });
+					message.suppressEmbeds(true).catch(error => { console.error(`MessageCreate: ${error.message}`); });
 				}
 			}
 			else if (iFunnyMatch) {
