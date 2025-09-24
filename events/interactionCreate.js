@@ -5,6 +5,11 @@ module.exports = {
 	async execute(interaction) {
 		const { cooldowns } = interaction.client;
 
+		if (interaction.guild) {
+			const guild = client.guilds.cache.get(interaction.guildId);
+			if (!guild) { return await interaction.reply({ content: 'I\'m not in this server and can\'t do shit!', flags: MessageFlags.Ephemeral }); }
+		}
+
 		if (interaction.isAutocomplete()) {
 			const command = interaction.client.commands.get(interaction.commandName);
 			if (!command || !command.autocomplete) return;

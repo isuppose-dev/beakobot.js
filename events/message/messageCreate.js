@@ -66,7 +66,8 @@ module.exports = {
 
 			if (twitterMatch) {
 				const tweetId = twitterMatch[2];
-				const res = await axios.get(`${FxAPIurl}/i/status/${tweetId}`, { headers: { 'User-Agent': userAgent } });
+				const res = await axios.get(`${FxAPIurl}/i/status/${tweetId}`, { headers: { 'User-Agent': userAgent } })
+					.catch(error => { return console.error(`MessageCreate: ${error.message}`); });
 				const data = res.data;
 				const photos = data.tweet.media?.photos || [];
 				const videos = data.tweet.media?.videos || [];
