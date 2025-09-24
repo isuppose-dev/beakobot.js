@@ -1,13 +1,14 @@
-const { Events, MessageFlags, Collection } = require('discord.js');
+const { Events, MessageFlags, Collection, ChannelType } = require('discord.js');
 
 module.exports = {
 	name: Events.InteractionCreate,
 	async execute(interaction) {
 		const { cooldowns } = interaction.client;
 
-		if (interaction.guild) {
-			const guild = client.guilds.cache.get(interaction.guildId);
+		if (!interaction.guild && (!interaction.channel || interaction.channel.type !== ChannelType.DM)) {
+			const guild = interaction.client.guilds.cache.get(interaction.guildId);
 			if (!guild) { return await interaction.reply({ content: 'I\'m not in this server and can\'t do shit!', flags: MessageFlags.Ephemeral }); }
+			else {return await interaction.reply({ content: 'WTF are you even doing??', flags: MessageFlags.Ephemeral }); }
 		}
 
 		if (interaction.isAutocomplete()) {
