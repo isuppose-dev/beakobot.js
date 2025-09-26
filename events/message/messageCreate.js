@@ -64,7 +64,7 @@ module.exports = {
 			const iFunnyRegex = /https?:\/\/(?:www\.)?ifunny\.co\/(meme|gif|picture|video)\/([a-zA-Z0-9]+)/i;
 			const iFunnyMatch = message.content.match(iFunnyRegex);
 
-			if (twitterMatch) {
+			if (twitterMatch && !isSpoilered(message.content, twitterMatch)) {
 				const tweetId = twitterMatch[2];
 
 				let res, data;
@@ -120,7 +120,7 @@ module.exports = {
 					message.suppressEmbeds(true).catch(error => { console.error(`MessageCreate: ${error.message}`); });
 				}
 			}
-			else if (iFunnyMatch) {
+			else if (iFunnyMatch && !isSpoilered(message.content, iFunnyMatch)) {
 				const type = iFunnyMatch[1];
 				const ifunnyContentUrl = `${message.content}`;
 				const res = await axios.get(ifunnyContentUrl, { headers: { 'User-Agent': userAgent, 'Ifunny-Project-Id' : 'iFunny', 'authorization' : 'guest' } });
@@ -176,3 +176,10 @@ module.exports = {
 		}
 	},
 };
+
+function isSpoilered(content, match) {
+	const spoilerRegex = /\|\|.*?\|\|/g;
+	const spoilers = content.match(spoilerRegex);
+	if (!spoilers) return false;
+	return spoilers.some(spoiler => spoiler.includes(match[0]));
+}
