@@ -85,7 +85,7 @@ module.exports = {
 					const fetchedMessage = await message.channel.messages.fetch(message.id);
 					if (fetchedMessage.embeds.length < 1) {
 						try {
-							const sent = await message.reply({ content: `[@${data.tweet.author.name}](${data.tweet.author.url})\n${data.tweet.text}`, files: [photos[0].url] });
+							const sent = await message.reply({ content: `[@${data.tweet.author.name}](${data.tweet.author.url})\n${data.tweet.text}`, files: [photos[0].url], allowedMentions: { repliedUser: false } });
 							const fetched = await message.channel.messages.fetch(sent.id);
 							await message.suppressEmbeds(true);
 							await fetched.suppressEmbeds(true);
@@ -97,7 +97,7 @@ module.exports = {
 				else if (photos.length > 1) {
 					const photoUrls = photos.map(photo => photo.url);
 					try {
-						const sent = await message.reply({ content: `[@${data.tweet.author.name}](${data.tweet.author.url})\n${data.tweet.text}`, files: photoUrls });
+						const sent = await message.reply({ content: `[@${data.tweet.author.name}](${data.tweet.author.url})\n${data.tweet.text}`, files: photoUrls, allowedMentions: { repliedUser: false } });
 						const fetched = await message.channel.messages.fetch(sent.id);
 						await message.suppressEmbeds(true);
 						await fetched.suppressEmbeds(true);
@@ -108,7 +108,7 @@ module.exports = {
 				// Embed video
 				else if (videos.length > 0) {
 					try {
-						const sent = await message.reply({ content: `[@${data.tweet.author.name}](${data.tweet.author.url})\n${data.tweet.text}`, files: [videos[0].url] });
+						const sent = await message.reply({ content: `[@${data.tweet.author.name}](${data.tweet.author.url})\n${data.tweet.text}`, files: [videos[0].url], allowedMentions: { repliedUser: false } });
 						const fetched = await message.channel.messages.fetch(sent.id);
 						await message.suppressEmbeds(true);
 						await fetched.suppressEmbeds(true);
@@ -128,17 +128,17 @@ module.exports = {
 
 				if (type === 'meme' || type === 'picture') {
 					const imageUrl = $('meta[property="og:image"]').attr('content');
-					message.reply({ files: [imageUrl] }).catch(error => { console.error(`MessageCreate: ${error.message}`); });
+					message.reply({ files: [imageUrl], allowedMentions: { repliedUser: false } }).catch(error => { console.error(`MessageCreate: ${error.message}`); });
 				}
 				else if (type === 'video') {
 					const videoUrl = $('meta[property="og:video:url"]').attr('content');
-					message.reply({ files: [videoUrl] }).catch(error => { console.error(`MessageCreate: ${error.message}`); });
+					message.reply({ files: [videoUrl], allowedMentions: { repliedUser: false } }).catch(error => { console.error(`MessageCreate: ${error.message}`); });
 				}
 				// iFunny fakes gifs and hides them in the html
 				else if (type === 'gif') {
 					const gifMatch = res.data.match(/https:\/\/img\.ifunny\.co\/images\/[^\s"']+\.mp4/i);
 					if (gifMatch) {
-						message.reply({ content: 'pretend this is a gif', files: [gifMatch[0]] }).catch(error => { console.error(`MessageCreate: ${error.message}`); });
+						message.reply({ content: 'pretend this is a gif', files: [gifMatch[0]], allowedMentions: { repliedUser: false } }).catch(error => { console.error(`MessageCreate: ${error.message}`); });
 					}
 				}
 			}
@@ -154,7 +154,7 @@ module.exports = {
 			const guildMessageRoles = await messageRoleModel.findAll({
 				where: { guild_id: message.guild.id } });
 
-			const textMatchRoles = guildMessageRoles.filter(role => message.content.includes(role.text));
+			const textMatchRoles = guildMessageRoles.filter(role => message.content.toLowerCase().includes(role.text.toLowerCase()));
 			const filteredRoles = textMatchRoles.filter(row => {
 				if (row.channel_id != null && row.channel_id != message.channel.id) return false;
 				if (row.is_strict === true) {
