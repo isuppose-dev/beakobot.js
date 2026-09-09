@@ -59,7 +59,7 @@ module.exports = {
 			// custom embeds when websites suck
 			const twitterRegex = /https?:\/\/(x|twitter)\.com\/[^/]+\/status\/(\d+)/;
 			const twitterMatch = message.content.match(twitterRegex);
-			const FxEmbedUrl = 'https://fxtwitter.com';
+			const FxEmbedUrl = 'https://cunnyx.com';
 			const FxAPIurl = 'https://api.fxtwitter.com';
 			const iFunnyRegex = /https?:\/\/(?:www\.)?ifunny\.co\/(meme|gif|picture|video)\/([a-zA-Z0-9]+)/i;
 			const iFunnyMatch = message.content.match(iFunnyRegex);
@@ -69,57 +69,40 @@ module.exports = {
 
 				let res, data;
 				try {
-					res = await axios.get(`${FxAPIurl}/i/status/${tweetId}`, { headers: { 'User-Agent': userAgent } });
+					res = await axios.get(`${FxAPIurl}/2/status/${tweetId}`, { headers: { 'User-Agent': userAgent } });
 					data = res.data;
 				}
 				catch (error) {
 					return console.error(`MessageCreate: ${error.message}`);
 				}
 
-				const photos = data.tweet.media?.photos || [];
-				const videos = data.tweet.media?.videos || [];
+				console.log(`X: ${data.status.possibly_sensitive} D: ${message.channel.nsfw}`);
 
-				// 1 Photo exists, isnt embedding (1 photo and it embeds who cares)
-				if (photos.length === 1) {
-					await new Promise(resolve => setTimeout(resolve, 1500));
-					const fetchedMessage = await message.channel.messages.fetch(message.id);
-					if (fetchedMessage.embeds.length < 1) {
+				if (data.status.possibly_sensitive === true) {
+					if (message.channel.nsfw) {
 						try {
-							const sent = await message.reply({ content: `[@${data.tweet.author.name}](${data.tweet.author.url})\n${data.tweet.text}`, files: [photos[0].url], allowedMentions: { repliedUser: false } });
-							const fetched = await message.channel.messages.fetch(sent.id);
+							await message.reply({ content: `[bad](${FxEmbedUrl}/i/status/${tweetId})`, allowedMentions: { repliedUser: false } });
 							await message.suppressEmbeds(true);
-							await fetched.suppressEmbeds(true);
+						}
+						catch (error) { console.error(`MessageCreate: ${error.message}`); }
+					}
+					else {
+						try {
+							await message.reply({ content: 'No NSFW posts in non-nsfw channels.....', allowedMentions: { repliedUser: false } });
+							await message.suppressEmbeds(true);
 						}
 						catch (error) { console.error(`MessageCreate: ${error.message}`); }
 					}
 				}
-				// Multiple photos
-				else if (photos.length > 1) {
-					const photoUrls = photos.map(photo => photo.url);
+				else {
 					try {
-						const sent = await message.reply({ content: `[@${data.tweet.author.name}](${data.tweet.author.url})\n${data.tweet.text}`, files: photoUrls, allowedMentions: { repliedUser: false } });
-						const fetched = await message.channel.messages.fetch(sent.id);
+						await message.reply({ content: `[brap](${FxEmbedUrl}/i/status/${tweetId})`, allowedMentions: { repliedUser: false } });
 						await message.suppressEmbeds(true);
-						await fetched.suppressEmbeds(true);
 					}
 					catch (error) { console.error(`MessageCreate: ${error.message}`); }
-
-				}
-				// Embed video
-				else if (videos.length > 0) {
-					try {
-						const sent = await message.reply({ content: `[@${data.tweet.author.name}](${data.tweet.author.url})\n${data.tweet.text}`, files: [videos[0].url], allowedMentions: { repliedUser: false } });
-						const fetched = await message.channel.messages.fetch(sent.id);
-						await message.suppressEmbeds(true);
-						await fetched.suppressEmbeds(true);
-					}
-					catch (error) { console.error(`MessageCreate: ${error.message}`); }
-				}
-				else if (data.tweet.text.length > 280) {
-					message.reply(`${FxEmbedUrl}/i/status/${tweetId}`).catch(error => { console.error(`MessageCreate: ${error.message}`); });
-					message.suppressEmbeds(true).catch(error => { console.error(`MessageCreate: ${error.message}`); });
 				}
 			}
+
 			else if (iFunnyMatch && !isSpoilered(message.content, iFunnyMatch)) {
 				const type = iFunnyMatch[1];
 				const ifunnyContentUrl = `${message.content}`;
@@ -128,17 +111,17 @@ module.exports = {
 
 				if (type === 'meme' || type === 'picture') {
 					const imageUrl = $('meta[property="og:image"]').attr('content');
-					message.reply({ files: [imageUrl], allowedMentions: { repliedUser: false } }).catch(error => { console.error(`MessageCreate: ${error.message}`); });
+					await message.reply({ files: [imageUrl], allowedMentions: { repliedUser: false } }).catch(error => { console.error(`MessageCreate: ${error.message}`); });
 				}
 				else if (type === 'video') {
 					const videoUrl = $('meta[property="og:video:url"]').attr('content');
-					message.reply({ files: [videoUrl], allowedMentions: { repliedUser: false } }).catch(error => { console.error(`MessageCreate: ${error.message}`); });
+					await message.reply({ files: [videoUrl], allowedMentions: { repliedUser: false } }).catch(error => { console.error(`MessageCreate: ${error.message}`); });
 				}
 				// iFunny fakes gifs and hides them in the html
 				else if (type === 'gif') {
-					const gifMatch = res.data.match(/https:\/\/img\.ifunny\.co\/images\/[^\s"']+\.mp4/i);
+					const gifMatch = res.data.match(/https?:\/\/[^"']+\.mp4/i);
 					if (gifMatch) {
-						message.reply({ content: 'pretend this is a gif', files: [gifMatch[0]], allowedMentions: { repliedUser: false } }).catch(error => { console.error(`MessageCreate: ${error.message}`); });
+						await message.reply({ content: 'gif machine broke', files: [gifMatch[0]], allowedMentions: { repliedUser: false } }).catch(error => { console.error(`MessageCreate: ${error.message}`); });
 					}
 				}
 			}
